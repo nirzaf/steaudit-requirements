@@ -1,0 +1,6 @@
+{
+  "name": "STE Audit Workflow & System Architecture Explorer",
+  "description": "Interactive system architecture, data flow diagram, and end-to-end workflow visualizer for the STE Audit Management Tool (ISA/IFRS compliant).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
