@@ -46,35 +46,48 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
   const jump = getJumpAction(node);
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-[480px] lg:w-[540px] bg-white border-l border-slate-200 shadow-2xl flex flex-col transform transition-transform duration-200 ease-out">
-      {/* Drawer Header */}
-      <div className="p-5 border-b border-slate-200 flex items-start justify-between bg-slate-50">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-blue-600 mb-1">
-            <span>Module {node.moduleId.replace('mod-', '')}</span>
-            <span aria-hidden="true">·</span>
-            <span>{node.moduleName}</span>
-            <span aria-hidden="true">·</span>
-            <span>Sequence Step {node.stageIndex}</span>
-          </div>
-          <h2 className="text-lg font-bold text-slate-900 leading-snug">
-            {node.title}
-          </h2>
-          <p className="text-xs text-slate-500 mt-1">
-            {node.shortDesc}
-          </p>
-        </div>
-        <button
-          onClick={onClose}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors"
-          aria-label="Close details"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
+    <>
+      {/* Mobile Backdrop Overlay */}
+      <div 
+        className="fixed inset-0 bg-slate-900/40 z-40 backdrop-blur-2xs transition-opacity" 
+        onClick={onClose}
+        aria-hidden="true"
+      />
 
-      {/* Drawer Body */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-6">
+      <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-[480px] lg:w-[540px] bg-white border-l border-slate-200 shadow-2xl flex flex-col transform transition-transform duration-200 ease-out">
+        {/* Mobile Swipe / Dismiss Handle */}
+        <div className="sm:hidden pt-2 pb-1 flex justify-center bg-slate-50 border-b border-slate-100">
+          <div className="w-12 h-1.5 bg-slate-300 rounded-full" />
+        </div>
+
+        {/* Drawer Header */}
+        <div className="p-4 sm:p-5 border-b border-slate-200 flex items-start justify-between bg-slate-50 gap-2">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 text-xs font-semibold text-blue-600 mb-1 flex-wrap">
+              <span>M{node.moduleId.replace('mod-', '')}</span>
+              <span aria-hidden="true">·</span>
+              <span className="truncate">{node.moduleName}</span>
+              <span aria-hidden="true">·</span>
+              <span className="font-mono">Step #{node.stageIndex}</span>
+            </div>
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
+              {node.title}
+            </h2>
+            <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+              {node.shortDesc}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0"
+            aria-label="Close details"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Drawer Body */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5 sm:space-y-6">
         {/* Personas and Regulatory Standards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
@@ -273,10 +286,13 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
       </div>
 
       {/* Drawer Footer Actions */}
-      <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-3">
+      <div 
+        className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-3 shrink-0"
+        style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 16px)' }}
+      >
         <button
           onClick={onClose}
-          className="px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200 rounded-md transition-colors"
+          className="px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-200 active:bg-slate-300 rounded-lg transition-colors min-h-[44px] touch-manipulation"
         >
           Close Drawer
         </button>
@@ -287,13 +303,14 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
               onJumpToTab(jump.tab);
               onClose();
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors shadow-xs"
+            className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-lg transition-colors shadow-xs min-h-[44px] touch-manipulation"
           >
             <ExternalLink className="w-3.5 h-3.5" />
-            <span>{jump.label}</span>
+            <span className="truncate max-w-[200px]">{jump.label}</span>
           </button>
         )}
       </div>
     </div>
+  </>
   );
 };

@@ -12,6 +12,7 @@ import {
   History, 
   FileCheck2,
   ChevronRight,
+  ChevronLeft,
   Sparkles
 } from 'lucide-react';
 import { STATE_MACHINE_STEPS, PERSONAS } from '../data/auditWorkflowData';
@@ -183,7 +184,7 @@ export const LifecycleStateMachine: React.FC<LifecycleStateMachineProps> = ({ on
             <button
               onClick={handleAdvance}
               disabled={!gateResult.satisfied || currentStepIndex === STATE_MACHINE_STEPS.length - 1}
-              className={`flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors shadow-xs ${
+              className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-1.5 text-xs font-semibold rounded-lg transition-colors shadow-xs min-h-[40px] sm:min-h-[36px] touch-manipulation ${
                 gateResult.satisfied && currentStepIndex < STATE_MACHINE_STEPS.length - 1
                   ? 'bg-blue-600 hover:bg-blue-700 text-white'
                   : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
@@ -195,8 +196,60 @@ export const LifecycleStateMachine: React.FC<LifecycleStateMachineProps> = ({ on
           </div>
         </div>
 
-        {/* 11 Steps Horizontal Bar */}
-        <div className="mt-6 pt-4 border-t border-slate-100 overflow-x-auto pb-2">
+        {/* Mobile Step Navigator (< md) */}
+        <div className="md:hidden mt-4 pt-3 border-t border-slate-100 space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <button
+              onClick={() => setCurrentStepIndex(Math.max(0, currentStepIndex - 1))}
+              disabled={currentStepIndex === 0}
+              className={`px-3 py-2 text-xs font-semibold rounded-lg border flex items-center gap-1 min-h-[44px] touch-manipulation ${
+                currentStepIndex === 0
+                  ? 'bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed'
+                  : 'bg-white text-slate-700 border-slate-200 active:bg-slate-100'
+              }`}
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Prev</span>
+            </button>
+
+            <div className="text-center min-w-0 flex-1 px-1">
+              <span className="text-[10px] font-mono text-slate-500 font-bold block">
+                STEP {currentStep.stepNumber} OF 11
+              </span>
+              <span className="text-xs font-bold text-slate-900 truncate block">
+                {currentStep.label}
+              </span>
+            </div>
+
+            <button
+              onClick={() => setCurrentStepIndex(Math.min(STATE_MACHINE_STEPS.length - 1, currentStepIndex + 1))}
+              disabled={currentStepIndex === STATE_MACHINE_STEPS.length - 1}
+              className={`px-3 py-2 text-xs font-semibold rounded-lg border flex items-center gap-1 min-h-[44px] touch-manipulation ${
+                currentStepIndex === STATE_MACHINE_STEPS.length - 1
+                  ? 'bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed'
+                  : 'bg-white text-slate-700 border-slate-200 active:bg-slate-100'
+              }`}
+            >
+              <span>Next</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          <select
+            value={currentStepIndex}
+            onChange={(e) => setCurrentStepIndex(Number(e.target.value))}
+            className="w-full bg-slate-50 text-slate-800 border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 min-h-[44px]"
+          >
+            {STATE_MACHINE_STEPS.map((s, idx) => (
+              <option key={s.id} value={idx}>
+                Step {s.stepNumber}: {s.label} ({s.id})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* 11 Steps Horizontal Bar (Desktop & Tablet >= md) */}
+        <div className="hidden md:block mt-6 pt-4 border-t border-slate-100 overflow-x-auto pb-2">
           <div className="flex items-center gap-1 min-w-[900px]">
             {STATE_MACHINE_STEPS.map((step, idx) => {
               const isPast = idx < currentStepIndex;

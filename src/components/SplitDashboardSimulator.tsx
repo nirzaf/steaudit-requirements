@@ -37,6 +37,7 @@ export const SplitDashboardSimulator: React.FC = () => {
   const [populationSize, setPopulationSize] = useState<number>(450);
   const [tolerableMisstatement, setTolerableMisstatement] = useState<number>(116000); // from materiality
   const [computedSampleSize, setComputedSampleSize] = useState<number>(36);
+  const [mobileViewMode, setMobileViewMode] = useState<'cards' | 'table'>('cards');
 
   const plItems = fslis.filter(f => f.statement === 'PL');
   const bsItems = fslis.filter(f => f.statement === 'BS');
@@ -48,6 +49,66 @@ export const SplitDashboardSimulator: React.FC = () => {
       maximumFractionDigits: 0
     }).format(val);
   };
+
+  const renderFSLICards = (items: FSLIItem[]) => (
+    <div className="p-3 sm:p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+      {items.map((item) => (
+        <div 
+          key={item.id} 
+          className="p-3.5 bg-white border border-slate-200 rounded-xl space-y-2.5 shadow-2xs hover:border-slate-300 transition-colors"
+        >
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <span className="text-[10px] font-mono text-slate-400 font-semibold uppercase">{item.code}</span>
+              <h3 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight truncate">{item.name}</h3>
+              <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mt-0.5">
+                <User className="w-3 h-3 text-slate-400" />
+                <span>Auditor: {item.assignedTo}</span>
+              </div>
+            </div>
+            <div className="shrink-0">{getRiskBadge(item.riskLevel)}</div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 py-2 px-2.5 bg-slate-50 rounded-lg text-xs border border-slate-100 text-center">
+            <div>
+              <span className="text-[10px] text-slate-400 block">Prior Year</span>
+              <span className="font-mono font-semibold text-slate-700 text-[11px] sm:text-xs">{formatQAR(item.priorYearQAR)}</span>
+            </div>
+            <div>
+              <span className="text-[10px] text-slate-400 block">Current Year</span>
+              <span className="font-mono font-bold text-slate-900 text-[11px] sm:text-xs">{formatQAR(item.currentYearQAR)}</span>
+            </div>
+            <div>
+              <span className="text-[10px] text-slate-400 block">Variance</span>
+              <span className={`font-mono font-bold text-[11px] sm:text-xs ${item.variancePercent > 0 ? 'text-blue-600' : 'text-slate-600'}`}>
+                +{item.variancePercent}%
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
+            <div>{getStatusBadge(item.status)}</div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                onClick={() => setActiveModal({ type: 'AR', fsli: item })}
+                className="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 active:bg-sky-200 border border-sky-200 flex items-center gap-1 min-h-[36px] touch-manipulation"
+              >
+                <TrendingUp className="w-3.5 h-3.5" />
+                <span>[AR Test]</span>
+              </button>
+              <button
+                onClick={() => setActiveModal({ type: 'WORKPROGRAM', fsli: item })}
+                className="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 active:bg-emerald-200 border border-emerald-200 flex items-center gap-1 min-h-[36px] touch-manipulation"
+              >
+                <ClipboardCheck className="w-3.5 h-3.5" />
+                <span>[Workprogram]</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 
   const getRiskBadge = (risk: 'GREEN' | 'AMBER' | 'RED') => {
     switch (risk) {
@@ -191,7 +252,7 @@ export const SplitDashboardSimulator: React.FC = () => {
               <Sparkles className="w-4 h-4" />
               <span>Section 1.2 & 4.3 · Technical Fieldwork Execution</span>
             </div>
-            <h1 className="text-xl font-bold text-slate-900 mt-1">
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900 mt-1">
               Split Financial Statement Dashboard View (P&L and Balance Sheet)
             </h1>
             <p className="text-xs text-slate-600 mt-1 max-w-3xl">
@@ -199,10 +260,29 @@ export const SplitDashboardSimulator: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-mono text-slate-600">
-            <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 font-semibold">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+              <button
+                onClick={() => setMobileViewMode('cards')}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-md min-h-[34px] transition-colors touch-manipulation ${
+                  mobileViewMode === 'cards' ? 'bg-white text-slate-900 shadow-2xs font-bold' : 'text-slate-600'
+                }`}
+              >
+                Cards View
+              </button>
+              <button
+                onClick={() => setMobileViewMode('table')}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-md min-h-[34px] transition-colors touch-manipulation ${
+                  mobileViewMode === 'table' ? 'bg-white text-slate-900 shadow-2xs font-bold' : 'text-slate-600'
+                }`}
+              >
+                Table View
+              </button>
+            </div>
+
+            <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 font-semibold text-xs font-mono">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>Row-Level Concurrency Active</span>
+              <span className="hidden sm:inline">Row-Level</span> Concurrency Active
             </span>
           </div>
         </div>
@@ -210,168 +290,176 @@ export const SplitDashboardSimulator: React.FC = () => {
 
       {/* Split Dashboard: Upper Half (P&L) */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div className="px-4 sm:px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-800 font-mono">
               UPPER VIEW
             </span>
-            <h2 className="text-sm font-bold text-slate-900">
+            <h2 className="text-xs sm:text-sm font-bold text-slate-900">
               Profit & Loss (P/L) Statement Line Items
             </h2>
           </div>
-          <span className="text-xs text-slate-500 font-mono">FY 2025 vs FY 2024 (QAR)</span>
+          <span className="text-[11px] sm:text-xs text-slate-500 font-mono">FY 2025 vs FY 2024 (QAR)</span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
-              <tr>
-                <th className="py-2.5 px-4">Line Item (FSLI)</th>
-                <th className="py-2.5 px-3">Assigned Auditor</th>
-                <th className="py-2.5 px-3 text-right">Prior Year (QAR)</th>
-                <th className="py-2.5 px-3 text-right">Current Year (QAR)</th>
-                <th className="py-2.5 px-3 text-right">Variance %</th>
-                <th className="py-2.5 px-3">Risk Tier</th>
-                <th className="py-2.5 px-3">Workflow State</th>
-                <th className="py-2.5 px-4 text-center">Execution Triggers</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {plItems.map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="py-3 px-4 font-semibold text-slate-900">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-mono text-slate-500">{item.code}</span>
-                      <span>{item.name}</span>
-                    </div>
-                  </td>
-                  <td className="py-3 px-3 text-slate-600">
-                    <span className="flex items-center gap-1">
-                      <User className="w-3 h-3 text-slate-400" />
-                      {item.assignedTo}
-                    </span>
-                  </td>
-                  <td className="py-3 px-3 text-right font-mono tabular-nums text-slate-600">
-                    {formatQAR(item.priorYearQAR)}
-                  </td>
-                  <td className="py-3 px-3 text-right font-mono tabular-nums font-semibold text-slate-900">
-                    {formatQAR(item.currentYearQAR)}
-                  </td>
-                  <td className="py-3 px-3 text-right font-mono tabular-nums font-semibold text-blue-600">
-                    +{item.variancePercent}%
-                  </td>
-                  <td className="py-3 px-3">
-                    {getRiskBadge(item.riskLevel)}
-                  </td>
-                  <td className="py-3 px-3">
-                    {getStatusBadge(item.status)}
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    <div className="flex items-center justify-center gap-1.5">
-                      <button
-                        onClick={() => setActiveModal({ type: 'AR', fsli: item })}
-                        className="px-2.5 py-1 text-xs font-semibold rounded bg-sky-50 text-sky-700 hover:bg-sky-100 transition-colors border border-sky-200 flex items-center gap-1"
-                      >
-                        <TrendingUp className="w-3 h-3" />
-                        <span>[AR Test]</span>
-                      </button>
-                      <button
-                        onClick={() => setActiveModal({ type: 'WORKPROGRAM', fsli: item })}
-                        className="px-2.5 py-1 text-xs font-semibold rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors border border-emerald-200 flex items-center gap-1"
-                      >
-                        <ClipboardCheck className="w-3 h-3" />
-                        <span>[Audit Workprogram]</span>
-                      </button>
-                    </div>
-                  </td>
+        {mobileViewMode === 'cards' ? (
+          renderFSLICards(plItems)
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+                <tr>
+                  <th className="py-2.5 px-4">Line Item (FSLI)</th>
+                  <th className="py-2.5 px-3">Assigned Auditor</th>
+                  <th className="py-2.5 px-3 text-right">Prior Year (QAR)</th>
+                  <th className="py-2.5 px-3 text-right">Current Year (QAR)</th>
+                  <th className="py-2.5 px-3 text-right">Variance %</th>
+                  <th className="py-2.5 px-3">Risk Tier</th>
+                  <th className="py-2.5 px-3">Workflow State</th>
+                  <th className="py-2.5 px-4 text-center">Execution Triggers</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {plItems.map((item) => (
+                  <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="py-3 px-4 font-semibold text-slate-900">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-mono text-slate-500">{item.code}</span>
+                        <span>{item.name}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-slate-600">
+                      <span className="flex items-center gap-1">
+                        <User className="w-3 h-3 text-slate-400" />
+                        {item.assignedTo}
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-right font-mono tabular-nums text-slate-600">
+                      {formatQAR(item.priorYearQAR)}
+                    </td>
+                    <td className="py-3 px-3 text-right font-mono tabular-nums font-semibold text-slate-900">
+                      {formatQAR(item.currentYearQAR)}
+                    </td>
+                    <td className="py-3 px-3 text-right font-mono tabular-nums font-semibold text-blue-600">
+                      +{item.variancePercent}%
+                    </td>
+                    <td className="py-3 px-3">
+                      {getRiskBadge(item.riskLevel)}
+                    </td>
+                    <td className="py-3 px-3">
+                      {getStatusBadge(item.status)}
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          onClick={() => setActiveModal({ type: 'AR', fsli: item })}
+                          className="px-2.5 py-1 text-xs font-semibold rounded bg-sky-50 text-sky-700 hover:bg-sky-100 transition-colors border border-sky-200 flex items-center gap-1 min-h-[32px] touch-manipulation"
+                        >
+                          <TrendingUp className="w-3 h-3" />
+                          <span>[AR Test]</span>
+                        </button>
+                        <button
+                          onClick={() => setActiveModal({ type: 'WORKPROGRAM', fsli: item })}
+                          className="px-2.5 py-1 text-xs font-semibold rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors border border-emerald-200 flex items-center gap-1 min-h-[32px] touch-manipulation"
+                        >
+                          <ClipboardCheck className="w-3 h-3" />
+                          <span>[Audit Workprogram]</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Split Dashboard: Lower Half (Balance Sheet) */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div className="px-4 sm:px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-100 text-purple-800 font-mono">
               LOWER VIEW
             </span>
-            <h2 className="text-sm font-bold text-slate-900">
+            <h2 className="text-xs sm:text-sm font-bold text-slate-900">
               Balance Sheet (B/S) Statement Line Items
             </h2>
           </div>
-          <span className="text-xs text-slate-500 font-mono">Assets & Liabilities (QAR)</span>
+          <span className="text-[11px] sm:text-xs text-slate-500 font-mono">Assets & Liabilities (QAR)</span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
-              <tr>
-                <th className="py-2.5 px-4">Line Item (FSLI)</th>
-                <th className="py-2.5 px-3">Assigned Auditor</th>
-                <th className="py-2.5 px-3 text-right">Prior Year (QAR)</th>
-                <th className="py-2.5 px-3 text-right">Current Year (QAR)</th>
-                <th className="py-2.5 px-3 text-right">Variance %</th>
-                <th className="py-2.5 px-3">Risk Tier</th>
-                <th className="py-2.5 px-3">Workflow State</th>
-                <th className="py-2.5 px-4 text-center">Execution Triggers</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {bsItems.map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="py-3 px-4 font-semibold text-slate-900">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-mono text-slate-500">{item.code}</span>
-                      <span>{item.name}</span>
-                    </div>
-                  </td>
-                  <td className="py-3 px-3 text-slate-600">
-                    <span className="flex items-center gap-1">
-                      <User className="w-3 h-3 text-slate-400" />
-                      {item.assignedTo}
-                    </span>
-                  </td>
-                  <td className="py-3 px-3 text-right font-mono tabular-nums text-slate-600">
-                    {formatQAR(item.priorYearQAR)}
-                  </td>
-                  <td className="py-3 px-3 text-right font-mono tabular-nums font-semibold text-slate-900">
-                    {formatQAR(item.currentYearQAR)}
-                  </td>
-                  <td className="py-3 px-3 text-right font-mono tabular-nums font-semibold text-blue-600">
-                    +{item.variancePercent}%
-                  </td>
-                  <td className="py-3 px-3">
-                    {getRiskBadge(item.riskLevel)}
-                  </td>
-                  <td className="py-3 px-3">
-                    {getStatusBadge(item.status)}
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    <div className="flex items-center justify-center gap-1.5">
-                      <button
-                        onClick={() => setActiveModal({ type: 'AR', fsli: item })}
-                        className="px-2.5 py-1 text-xs font-semibold rounded bg-sky-50 text-sky-700 hover:bg-sky-100 transition-colors border border-sky-200 flex items-center gap-1"
-                      >
-                        <TrendingUp className="w-3 h-3" />
-                        <span>[AR Test]</span>
-                      </button>
-                      <button
-                        onClick={() => setActiveModal({ type: 'WORKPROGRAM', fsli: item })}
-                        className="px-2.5 py-1 text-xs font-semibold rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors border border-emerald-200 flex items-center gap-1"
-                      >
-                        <ClipboardCheck className="w-3 h-3" />
-                        <span>[Audit Workprogram]</span>
-                      </button>
-                    </div>
-                  </td>
+        {mobileViewMode === 'cards' ? (
+          renderFSLICards(bsItems)
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+                <tr>
+                  <th className="py-2.5 px-4">Line Item (FSLI)</th>
+                  <th className="py-2.5 px-3">Assigned Auditor</th>
+                  <th className="py-2.5 px-3 text-right">Prior Year (QAR)</th>
+                  <th className="py-2.5 px-3 text-right">Current Year (QAR)</th>
+                  <th className="py-2.5 px-3 text-right">Variance %</th>
+                  <th className="py-2.5 px-3">Risk Tier</th>
+                  <th className="py-2.5 px-3">Workflow State</th>
+                  <th className="py-2.5 px-4 text-center">Execution Triggers</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {bsItems.map((item) => (
+                  <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="py-3 px-4 font-semibold text-slate-900">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-mono text-slate-500">{item.code}</span>
+                        <span>{item.name}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-slate-600">
+                      <span className="flex items-center gap-1">
+                        <User className="w-3 h-3 text-slate-400" />
+                        {item.assignedTo}
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-right font-mono tabular-nums text-slate-600">
+                      {formatQAR(item.priorYearQAR)}
+                    </td>
+                    <td className="py-3 px-3 text-right font-mono tabular-nums font-semibold text-slate-900">
+                      {formatQAR(item.currentYearQAR)}
+                    </td>
+                    <td className="py-3 px-3 text-right font-mono tabular-nums font-semibold text-blue-600">
+                      +{item.variancePercent}%
+                    </td>
+                    <td className="py-3 px-3">
+                      {getRiskBadge(item.riskLevel)}
+                    </td>
+                    <td className="py-3 px-3">
+                      {getStatusBadge(item.status)}
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          onClick={() => setActiveModal({ type: 'AR', fsli: item })}
+                          className="px-2.5 py-1 text-xs font-semibold rounded bg-sky-50 text-sky-700 hover:bg-sky-100 transition-colors border border-sky-200 flex items-center gap-1 min-h-[32px] touch-manipulation"
+                        >
+                          <TrendingUp className="w-3 h-3" />
+                          <span>[AR Test]</span>
+                        </button>
+                        <button
+                          onClick={() => setActiveModal({ type: 'WORKPROGRAM', fsli: item })}
+                          className="px-2.5 py-1 text-xs font-semibold rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors border border-emerald-200 flex items-center gap-1 min-h-[32px] touch-manipulation"
+                        >
+                          <ClipboardCheck className="w-3 h-3" />
+                          <span>[Audit Workprogram]</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Interactive Modal: Analytical Review [AR Test] */}
@@ -489,13 +577,13 @@ export const SplitDashboardSimulator: React.FC = () => {
             {/* Modal Body */}
             <div className="p-5 overflow-y-auto space-y-6 text-xs flex-1">
               {/* Sampling Engine Banner */}
-              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-                <div className="flex items-center justify-between mb-2">
+              <div className="p-3 sm:p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
                   <div className="flex items-center gap-1.5 font-bold text-slate-800">
-                    <Target className="w-4 h-4 text-blue-600" />
+                    <Target className="w-4 h-4 text-blue-600 shrink-0" />
                     <span>Embedded Population & Sampling Engine (ISA 530)</span>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex flex-wrap items-center gap-1">
                     {(['MUS', 'RANDOM', 'STRATIFIED'] as const).map(m => (
                       <button
                         key={m}
@@ -503,9 +591,9 @@ export const SplitDashboardSimulator: React.FC = () => {
                           setSamplingMethod(m);
                           handleRecalculateSampling(populationSize, tolerableMisstatement);
                         }}
-                        className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors ${
+                        className={`px-2.5 py-1 rounded text-[11px] font-medium transition-colors min-h-[32px] touch-manipulation ${
                           samplingMethod === m
-                            ? 'bg-blue-600 text-white shadow-2xs'
+                            ? 'bg-blue-600 text-white shadow-2xs font-semibold'
                             : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
                         }`}
                       >
@@ -520,22 +608,24 @@ export const SplitDashboardSimulator: React.FC = () => {
                     <label className="text-slate-500 block text-[10px] mb-0.5">Total Population Vouchers</label>
                     <input
                       type="number"
+                      inputMode="numeric"
                       value={populationSize}
                       onChange={(e) => handleRecalculateSampling(Number(e.target.value), tolerableMisstatement)}
-                      className="w-full bg-white border border-slate-200 rounded px-2.5 py-1 font-mono text-xs text-slate-800"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 font-mono text-sm sm:text-xs text-slate-800 min-h-[38px] sm:min-h-[32px]"
                     />
                   </div>
                   <div>
                     <label className="text-slate-500 block text-[10px] mb-0.5">Tolerable Error Cutoff (QAR)</label>
                     <input
                       type="number"
+                      inputMode="numeric"
                       value={tolerableMisstatement}
                       onChange={(e) => handleRecalculateSampling(populationSize, Number(e.target.value))}
-                      className="w-full bg-white border border-slate-200 rounded px-2.5 py-1 font-mono text-xs text-slate-800"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 font-mono text-sm sm:text-xs text-slate-800 min-h-[38px] sm:min-h-[32px]"
                     />
                   </div>
                   <div className="flex flex-col justify-end">
-                    <div className="p-1.5 rounded bg-blue-50 border border-blue-200 text-center font-bold text-blue-700">
+                    <div className="p-2 rounded-lg bg-blue-50 border border-blue-200 text-center font-bold text-blue-700 text-xs">
                       Calculated Sample Size: {computedSampleSize} Vouchers
                     </div>
                   </div>

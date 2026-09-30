@@ -13,6 +13,7 @@ import { DeliverablesArchiveGate } from './components/DeliverablesArchiveGate';
 import { PracticeAnalytics } from './components/PracticeAnalytics';
 import { NodeDetailDrawer } from './components/NodeDetailDrawer';
 import { QuickTourModal } from './components/QuickTourModal';
+import { MobileBottomNav } from './components/MobileBottomNav';
 import { PersonaRole, ISACategory } from './types/audit';
 import { PERSONAS } from './data/auditWorkflowData';
 import { Search, Info, ShieldCheck, Layers, BookOpen } from 'lucide-react';
@@ -95,7 +96,7 @@ export default function App() {
       )}
 
       {/* Main Content Workspace Container (1440px max width baseline) */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-20 lg:pb-8">
         {activeTab === 'architecture' && (
           <ArchitectureDiagram
             selectedNodeId={selectedNodeId}
@@ -103,13 +104,19 @@ export default function App() {
             selectedPersona={selectedPersona}
             selectedISA={selectedISA}
             isEnhancedStandards={isEnhancedStandards}
-            onJumpToTab={(tab) => setActiveTab(tab)}
+            onJumpToTab={(tab) => {
+              setActiveTab(tab);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
           />
         )}
 
         {activeTab === 'lifecycle' && (
           <LifecycleStateMachine
-            onJumpToTab={(tab) => setActiveTab(tab)}
+            onJumpToTab={(tab) => {
+              setActiveTab(tab);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
           />
         )}
 
@@ -135,33 +142,45 @@ export default function App() {
         nodeId={selectedNodeId}
         onClose={() => setSelectedNodeId(null)}
         onSelectNode={(id) => setSelectedNodeId(id)}
-        onJumpToTab={(tab) => setActiveTab(tab)}
+        onJumpToTab={(tab) => {
+          setActiveTab(tab);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
       />
 
       {/* Interactive Quick Tour Modal */}
       <QuickTourModal
         isOpen={isTourOpen}
         onClose={() => setIsTourOpen(false)}
-        onSelectTab={(tab) => setActiveTab(tab)}
+        onSelectTab={(tab) => {
+          setActiveTab(tab);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
+
+      {/* Mobile Sticky Bottom Navigation Bar (Screens < lg) */}
+      <MobileBottomNav
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
       />
 
       {/* Footer adhering strictly to anti-slop guidelines: quiet copyright and metadata */}
-      <footer className="mt-auto border-t border-slate-200 bg-white py-6 text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+      <footer className="mt-auto border-t border-slate-200 bg-white py-5 sm:py-6 text-xs text-slate-500 mb-16 lg:mb-0">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-center sm:justify-start text-center">
             <span className="font-semibold text-slate-700">
               STE Audit Management Tool
             </span>
             <span aria-hidden="true">·</span>
             <span>Version 2.1 Specification</span>
-            <span aria-hidden="true">·</span>
-            <span>Qatar Regulatory Jurisdiction (QAR)</span>
+            <span aria-hidden="true" className="hidden sm:inline">·</span>
+            <span className="hidden sm:inline">Qatar Jurisdiction (QAR)</span>
           </div>
 
-          <div className="flex items-center gap-4 text-[11px]">
-            <span>ISA 210 / 220 / 230 / 320 / 505 / 570 / 700 / 705</span>
+          <div className="flex items-center gap-3 sm:gap-4 text-[11px] text-center">
+            <span>ISA & IFRS Compliance</span>
             <span aria-hidden="true">·</span>
-            <span>Unlimited Client Files Policy</span>
+            <span>Unlimited Client Files</span>
           </div>
         </div>
       </footer>
